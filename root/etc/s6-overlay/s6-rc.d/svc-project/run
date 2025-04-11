@@ -1,0 +1,44 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+FPYVENV="/app/pyvenv"
+RUNENGINE="bun --hot"
+PRJDIR="/app"
+script="app.js"
+
+if [[ ! -z ${INTERPRETER} ]]; then
+    RUNENGINE=$INTERPRETER
+    if [[ "$RUNENGINE" == "python" ]]; then
+        script="app.py"
+    fi
+fi
+
+if [[ ! -f "${PRJDIR}/${script}" ]]; then
+    PRJDIR="/scripts"
+    if [[ "$RUNENGINE" != "python" ]]; then
+        RUNENGINE="bun --hot"
+    fi    
+fi
+
+if [[ -n ${USER_NAME+x} ]] && [[ -n ${USER_PASSWORD+x} ]]; then
+    if [[ ! -z ${PYVENV} ]] && [[ -d ${FPYVENV} ]]; then
+        echo "Activate python virtual environment"
+        source ${FPYVENV}/bin/activate                
+    fi
+    echo "${RUNENGINE} is the current runtime engine!"
+    exec \
+        s6-notifyoncheck -d -n 300 -w 1000 -c "nc -z localhost 3000" \
+            cd ${PRJDIR} s6-setuidgid "${USER_NAME}" \
+            ${RUNENGINE} ${script} --user="${USER_NAME}" --homedir="/home/${USER_NAME}" --mode="${RUN_MODE}" --engine="${RUN_ENGINE}"  -l 0.0.0.0 -p 3000 \
+            --username "${USER_NAME}" --password "${USER_PASSWORD}"
+
+else
+    if [[ ! -z ${PYVENV} ]] && [[ -d ${FPYVENV} ]]; then
+        echo "Activate python virtual environment"
+        source ${FPYVENV}/bin/activate        
+    fi
+    exec \
+        s6-notifyoncheck -d -n 300 -w 1000 -c "nc -z localhost 3000" \
+            cd ${PRJDIR} s6-setuidgid bunadmin \
+            ${INTERPRETER} ${script} --user="${USER_NAME}" --homedir="/home/${USER_NAME}" --mode="${RUN_MODE}" --engine="${RUN_ENGINE}"  -l 0.0.0.0 -p 3000
+fi

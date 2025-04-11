@@ -1,0 +1,32 @@
+#!/usr/bin/with-contenv bash
+
+PUID=${PUID:-911}
+PGID=${PGID:-911}
+
+FPYVENV="/app/pyvenv"
+RTXT="/app/requirements.txt"
+
+if [[ ! -z ${PYVENV} ]] && [[ ! -d ${FPYVENV} ]]; then
+    
+    python3 -m venv ${FPYVENV} && source ${FPYVENV}/bin/activate
+    if [[ -f ${RTXT} ]]; then
+      pip3 install -r ${RTXT}
+    fi
+    if [ ! -z ${USER_NAME+x} ]; then
+      chown -R ${PUID}:${PGID} ${FPYVENV}
+    fi
+    echo "Python virtual environment setup done!"
+fi
+
+PJSON="/app/package.json"
+NMODULES="/app/node_modules"
+if [[ ! -d ${NMODULES} ]] && [[ -f ${PJSON} ]]; then
+  if [ ! -z ${USER_NAME+x} ]; then
+    cd /app &&  bun install --no-save --no-lockfile && chown -R ${PUID}:${PGID} node_modules
+  else
+    cd /app &&  bun install --no-save --no-lockfile
+  fi
+  echo "Install node_modules done!"
+fi
+
+echo “init-project-config done!”
