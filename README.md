@@ -90,7 +90,7 @@
 - Change the password without prompt message box
 
   ```
-  echo rndeveloper:wkloh | sudo chpasswd
+  echo <user>:<password>> | sudo chpasswd
   ```
 
 - [baseimage alpine 3.21-7cfed05e-ls8](https://github.com/linuxserver/docker-baseimage-alpine/releases/tag/3.21-7cfed05e-ls8)
