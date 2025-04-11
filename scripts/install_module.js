@@ -13,7 +13,6 @@
  * See the Mulan PSL v2 for more details.
  * -------------------------------------------------------------------------
  */
-"use strict";
 
 const { $ } = require("bun");
 const { join, basename } = require("path");
