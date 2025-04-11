@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update container service `nodebun-deploy` to `nodebun_deploy` at docker-compose.yml file.Completed on 2025-04-11
+
 ### Deprecated
 
 ### Removed
