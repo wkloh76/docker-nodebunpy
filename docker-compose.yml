@@ -16,10 +16,12 @@ services:
       - TZ=Asia/Kuala_Lumpur
       - RUN_MODE=debug # debug or production
       - RUN_ENGINE=webnodejs # webnodejs
-      - USER_PASSWORD=node1234 # Allow to change
-      - USER_NAME=node # Allow to change
+      - USER_PASSWORD=test1234 # Allow to change
+      - USER_NAME=test # Allow to change
       # - PYVENV=YES # Active python virtual environment service
       - INTERPRETER=node # Change runtime engine such as python3,nodejs and bun, default is bun
+      # - MAIN_APP=app.js
+
     # volumes:
     #   - ./testapp/app:/app  # The source code point to /app directory
     working_dir: /app

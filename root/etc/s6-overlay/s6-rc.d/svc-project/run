@@ -1,44 +1,50 @@
 #!/usr/bin/with-contenv bash
 # shellcheck shell=bash
 
-FPYVENV="/app/pyvenv"
+BUNUSER=${USER_NAME:-bunadmin};
+NUSER=""
 RUNENGINE="bun --hot"
 PRJDIR="/app"
 script="app.js"
 
-if [[ ! -z ${INTERPRETER} ]]; then
-    RUNENGINE=$INTERPRETER
-    if [[ "$RUNENGINE" == "python" ]]; then
-        script="app.py"
-    fi
+FPYVENV="/app/pyvenv"
+if [[ ! -z ${PYVENV} ]] && [[ -d ${FPYVENV} ]]; then
+    echo "Activate python virtual environment"
+    source ${FPYVENV}/bin/activate                
 fi
 
+if [[ ! -z ${INTERPRETER} ]]; then
+    RUNENGINE=$INTERPRETER
+fi
+
+if [[ "$RUNENGINE" == "python" ]]; then
+    script="app.py"
+fi
+
+# Trigger internal dummny web server if the script no exists
 if [[ ! -f "${PRJDIR}/${script}" ]]; then
     PRJDIR="/scripts"
-    if [[ "$RUNENGINE" != "python" ]]; then
-        RUNENGINE="bun --hot"
+    if [[ "$RUNENGINE" == "python" ]]; then
+        script="app.py"
+    else 
+        script="app.js"
     fi    
 fi
 
 if [[ -n ${USER_NAME+x} ]] && [[ -n ${USER_PASSWORD+x} ]]; then
-    if [[ ! -z ${PYVENV} ]] && [[ -d ${FPYVENV} ]]; then
-        echo "Activate python virtual environment"
-        source ${FPYVENV}/bin/activate                
-    fi
-    echo "${RUNENGINE} is the current runtime engine!"
-    exec \
-        s6-notifyoncheck -d -n 300 -w 1000 -c "nc -z localhost 3000" \
-            cd ${PRJDIR} s6-setuidgid "${USER_NAME}" \
-            ${RUNENGINE} ${script} --user="${USER_NAME}" --homedir="/home/${USER_NAME}" --mode="${RUN_MODE}" --engine="${RUN_ENGINE}"  -l 0.0.0.0 -p 3000 \
-            --username "${USER_NAME}" --password "${USER_PASSWORD}"
+    NUSER="--username $USER_NAME --password $USER_PASSWORD"
+fi
 
-else
-    if [[ ! -z ${PYVENV} ]] && [[ -d ${FPYVENV} ]]; then
-        echo "Activate python virtual environment"
-        source ${FPYVENV}/bin/activate        
-    fi
+if [[ ! -z ${MAIN_APP} ]]; then
     exec \
         s6-notifyoncheck -d -n 300 -w 1000 -c "nc -z localhost 3000" \
-            cd ${PRJDIR} s6-setuidgid bunadmin \
-            ${INTERPRETER} ${script} --user="${USER_NAME}" --homedir="/home/${USER_NAME}" --mode="${RUN_MODE}" --engine="${RUN_ENGINE}"  -l 0.0.0.0 -p 3000
+            cd ${PRJDIR} s6-setuidgid "${BUNUSER}" \
+            ${RUNENGINE} ${MAIN_APP} \
+            ${NUSER}
+else
+    exec \
+        s6-notifyoncheck -d -n 300 -w 1000 -c "nc -z localhost 3000" \
+            cd ${PRJDIR} s6-setuidgid "${BUNUSER}" \
+            ${RUNENGINE} ${script} --user="${USER_NAME}" --homedir="/home/${USER_NAME}" --mode="${RUN_MODE}" --engine="${RUN_ENGINE}"  -l 0.0.0.0 -p 3000 \
+            ${NUSER}
 fi
