@@ -10,6 +10,7 @@
 ## Objectvie
 
 - Design docker images which will able deploy the project in `NodeJS` , `BunJS` or `Python3` design.
+- Project default framework is OricommJS which backend and frontend render html statement to browser. You can use other framework to support your project but the `docker-compose.yml` need to change a little bit.
 
 - The docker-compose files combine both build and up containers feature in one files.
 
@@ -47,7 +48,7 @@
 
 ## Take Noted
 
-- Docker build image depend on `.env` file. So, copy and paste `.env.example` and rename it to `.env`. Ater that run command `docker compose build` in the terminal with same project.
+- Docker image building relies on `.env` files. So copy and paste ".env.example" and rename it to ".env". After that run the command "docker compose build" in the terminal with the same project. You can change the .env setting value yourself.
   ```
   nodebun-build:
     image: "${IMG}:${TAG}-${ARG1}"
@@ -74,6 +75,7 @@
         - USER_NAME=node # Allow to change
         # - PYVENV=YES # Active python virtual environment service
         - INTERPRETER=node # Change runtime engine such as python,node and bun, default is bun
+        # - MAIN_APP=app.js
       # volumes:
       #   - ./testapp/app:/app  # The source code point to /app directory
       working_dir: /app
@@ -84,6 +86,84 @@
   ```
 
 - The project will run and target to `app.js` or `app.py` file.
+- Different senario the docker-compose setting will be change.
+
+  1.  Default - Only support OricommJS framework run with node interpreter. The project code folder mount to /app. If want python virtual environment support , just change `PYVENV=YES` and make sure your project has `requirement.txt` file to install python packages during first time activate.
+
+      ```
+        nodebun-deploy:
+        image: "${IMG}:${TAG}-${ARG1}"
+        container_name: nodebun_deploy
+        environment:
+          - PUID=1000
+          - PGID=1000
+          - TZ=Asia/Kuala_Lumpur
+          - RUN_MODE=debug # debug or production
+          - RUN_ENGINE=webnodejs # webnodejs
+          - USER_PASSWORD=node1234 # Allow to change
+          - USER_NAME=node # Allow to change
+          - PYVENV=NO # Active python virtual environment
+        volumes:
+          - ./testapp/app:/app  # The source code point to /app directory
+        working_dir: /app
+        ports:
+          - 9820-9821:3000-3001
+        shm_size: "2gb"
+        restart: unless-stopped
+      ```
+
+  2.  OricommJS framework run with bun interpreter.
+
+      ```
+        nodebun-deploy:
+        image: "${IMG}:${TAG}-${ARG1}"
+        container_name: nodebun_deploy
+        environment:
+          - PUID=1000
+          - PGID=1000
+          - TZ=Asia/Kuala_Lumpur
+          - RUN_MODE=debug # debug or production
+          - RUN_ENGINE=webnodejs # webnodejs
+          - USER_PASSWORD=node1234 # Allow to change
+          - USER_NAME=node # Allow to change
+          - PYVENV=NO # Active python virtual
+          environment
+          - INTERPRETER=bun # Change runtime engine such as python,node and bun, default is bun
+        volumes:
+          - ./testapp/app:/app  # The source code point to /app directory
+        working_dir: /app
+        ports:
+          - 9820-9821:3000-3001
+        shm_size: "2gb"
+        restart: unless-stopped
+      ```
+
+  3.  For different framework project and different main script, assign the script file for `MAIN_APP` and other interpreter like ptyhon.
+
+      ```
+        nodebun-deploy:
+        image: "${IMG}:${TAG}-${ARG1}"
+        container_name: nodebun_deploy
+        environment:
+          - PUID=1000
+          - PGID=1000
+          - TZ=Asia/Kuala_Lumpur
+          - RUN_MODE=debug # debug or production
+          - RUN_ENGINE=webnodejs # webnodejs
+          - USER_PASSWORD=node1234 # Allow to change
+          - USER_NAME=node # Allow to change
+          - PYVENV=NO # Active python virtual
+          environment
+          - INTERPRETER=python # Change runtime engine such as python,node and bun, default is bun
+          - MAIN_APP=app.py
+        volumes:
+          - ./testapp/app:/app  # The source code point to /app directory
+        working_dir: /app
+        ports:
+          - 9820-9821:3000-3001
+        shm_size: "2gb"
+        restart: unless-stopped
+      ```
 
 # Reference
 
@@ -92,6 +172,8 @@
   ```
   echo <user>:<password>> | sudo chpasswd
   ```
+
+- [linueserver.io](https://github.com/linuxserver) is great community which provide allow of user docker images and also source code for build docker images. I am learn a lot form here.
 
 - [baseimage alpine 3.21-7cfed05e-ls8](https://github.com/linuxserver/docker-baseimage-alpine/releases/tag/3.21-7cfed05e-ls8)
 
