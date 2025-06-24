@@ -2,7 +2,7 @@
 
 PUID=${PUID:-911}
 PGID=${PGID:-911}
-
+SYNO=${SYNO:-false}
 FPYVENV="/app/pyvenv"
 RTXT="/app/requirements.txt"
 
@@ -22,9 +22,21 @@ PJSON="/app/package.json"
 NMODULES="/app/node_modules"
 if [[ ! -d ${NMODULES} ]] && [[ -f ${PJSON} ]]; then
   if [ ! -z ${USER_NAME+x} ]; then
-    cd /app &&  bun install --no-save --no-lockfile && chown -R ${PUID}:${PGID} node_modules
+    if $SYNO ; then
+      helper --proc=install --dir="/app" --target="/app"  && \
+      chown -R ${PUID}:${PGID} /nodepath && \
+      cp -r /nodepath/app/node_modules /app && \
+      chown -R ${PUID}:${PGID} /app/node_modules
+      echo "Install nodepath done!"
+    else
+      cd /app &&  bun install --no-save --no-lockfile && chown -R ${PUID}:${PGID} node_modules
+    fi    
   else
-    cd /app &&  bun install --no-save --no-lockfile
+    if $SYNO ; then
+      helper --proc=install --dir="/app" --target="/app"
+    else
+      cd /app &&  bun install --no-save --no-lockfile
+    fi    
   fi
   echo "Install node_modules done!"
 fi

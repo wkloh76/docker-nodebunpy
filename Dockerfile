@@ -1,43 +1,39 @@
 # syntax=docker/dockerfile:1
 
-FROM alpine:3.20 AS rootfs-stage
+FROM alpine:3.21 AS rootfs-stage
 
-# environment
-ENV ROOTFS=/root-out
-ENV REL=v3.21
-ENV ARCH=x86_64
-ENV MIRROR=http://dl-cdn.alpinelinux.org/alpine
-ENV PACKAGES=alpine-baselayout,\
+ARG S6_OVERLAY_VERSION="3.2.1.0"
+ARG ROOTFS=/root-out
+ARG REL=v3.22
+ARG ARCH=x86_64
+ARG MIRROR=http://dl-cdn.alpinelinux.org/alpine
+ARG PACKAGES=alpine-baselayout,\
 alpine-keys,\
 apk-tools,\
 busybox,\
 libc-utils
 
+# install packages
 RUN \
-  echo "**** install runtime dependencies ****" && \
-  apk add sudo \
-  git 
-  
+  apk add --no-cache \
+    bash \
+    xz
 
 # build rootfs
 RUN \
-  mkdir -p "$ROOTFS/etc/apk" && \
+  mkdir -p "${ROOTFS}/etc/apk" && \
   { \
-    echo "$MIRROR/$REL/main"; \
-    echo "$MIRROR/$REL/community"; \
-  } > "$ROOTFS/etc/apk/repositories" && \
-  apk --root "$ROOTFS" --no-cache --keys-dir /etc/apk/keys add --arch $ARCH --initdb ${PACKAGES//,/ } && \
+    echo "${MIRROR}/${REL}/main"; \
+    echo "${MIRROR}/${REL}/community"; \
+  } > "${ROOTFS}/etc/apk/repositories" && \
+  apk --root "${ROOTFS}" --no-cache --keys-dir /etc/apk/keys add --arch ${ARCH} --initdb ${PACKAGES//,/ } && \
   sed -i -e 's/^root::/root:!:/' /root-out/etc/shadow
-
-# set version for s6 overlay
-ARG S6_OVERLAY_VERSION="3.2.0.2"
-ARG S6_OVERLAY_ARCH="x86_64"
 
 # add s6 overlay
 ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
 RUN tar -C /root-out -Jxpf /tmp/s6-overlay-noarch.tar.xz
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz /tmp
-RUN tar -C /root-out -Jxpf /tmp/s6-overlay-${S6_OVERLAY_ARCH}.tar.xz
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${ARCH}.tar.xz /tmp
+RUN tar -C /root-out -Jxpf /tmp/s6-overlay-${ARCH}.tar.xz
 
 # add s6 optional symlinks
 ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz /tmp
@@ -119,7 +115,7 @@ ARG NODE_VERSION
           curl \
       && ARCH= OPENSSL_ARCH='linux*' && alpineArch="$(apk --print-arch)" \
         && case "${alpineArch##*-}" in \
-          x86_64) ARCH='x64' CHECKSUM="b2a58593a9de31ca444fe095cb2db0674bdccab426ee6803110ca17867bdac26" OPENSSL_ARCH=linux-x86_64;; \
+          x86_64) ARCH='x64' CHECKSUM="03eabd9b71b3a2376693b521543251edd90dfb188883bcba4c07045d7ee46cd4" OPENSSL_ARCH=linux-x86_64;; \
           x86) OPENSSL_ARCH=linux-elf;; \
           aarch64) OPENSSL_ARCH=linux-aarch64;; \
           arm*) OPENSSL_ARCH=linux-armv4;; \

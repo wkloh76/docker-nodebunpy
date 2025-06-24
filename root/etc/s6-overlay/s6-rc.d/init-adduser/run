@@ -17,8 +17,8 @@ else
         echo "$BUNUSER:$USER_PASSWORD" | chpasswd && \
         usermod -G users $BUNUSER && \
         # usermod -aG sudo $BUNUSER && \
-        mkdir -p /home/$BUNUSER && \
-        chown -R ${PUID}:${PGID} /home/$BUNUSER
+        mkdir -p /home/$BUNUSER /{build,deployment,nodepath} && \
+        chown -R ${PUID}:${PGID} /home/$BUNUSER /{build,deployment}
     groupmod -o -g "$PGID" $BUNUSER
     usermod -o -u "$PUID" $BUNUSER
 

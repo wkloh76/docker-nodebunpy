@@ -106,23 +106,16 @@ const searchFiles = async (dir, targetName) => {
         await writeFile(`${build}/package.json`, JSON.stringify(package));
         await $`${{ raw: "bun install --no-save --no-lockfile" }}`.cwd(build);
         if (whoami != "")
-          await $`${{ raw: `mkdir -p /nodepath${whoami}/${basename(dir)}` }}`;
-        if (await exists(`/nodepath${whoami}/${basename(dir)}/node_modules`))
-          await $`${{ raw: `rm -r /nodepath${whoami}/${basename(dir)}` }}`;
+          await $`${{ raw: `mkdir -p /nodepath/${basename(dir)}` }}`;
+        if (await exists(`/nodepath/${basename(dir)}/node_modules`))
+          await $`${{ raw: `rm -r /nodepath/${basename(dir)}` }}`;
         await $`${{
-          raw: `cp -r node_modules /nodepath${whoami}/${basename(
+          raw: `cp -r node_modules /nodepath/${basename(
             dir
           )}/node_modules`,
         }}`.cwd(build);
       }
 
-      if (target) {
-        await $`${{
-          raw: `ln -sfn  /nodepath${whoami}/${basename(
-            dir
-          )}/node_modules ${target}/node_modules`,
-        }}`;
-      }
       await $`${{ raw: "rm -r node_modules package.json" }}`.cwd(build);
       console.log("Install done!");
       break;

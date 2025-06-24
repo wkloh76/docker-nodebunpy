@@ -21,6 +21,7 @@ services:
       # - PYVENV=YES # Active python virtual environment service
       - INTERPRETER=node # Change runtime engine such as python3,nodejs and bun, default is bun
       # - MAIN_APP=app.js
+      # - SYNO=true
 
     # volumes:
     #   - ./testapp/app:/app  # The source code point to /app directory
