@@ -97,7 +97,7 @@ RUN \
     /tmp/*
 
 RUN \
-  echo "**** install runtime packages ****" && \
+  echo "**** install packages ****" && \
   apk add sudo \    
     git \  
     python3 \
@@ -106,7 +106,8 @@ RUN \
     iproute2 \
     bash \
     xz \
-    lsof
+    lsof \
+    tar
 
 ARG NODE_VERSION    
   RUN apk add --no-cache \
@@ -115,7 +116,7 @@ ARG NODE_VERSION
           curl \
       && ARCH= OPENSSL_ARCH='linux*' && alpineArch="$(apk --print-arch)" \
         && case "${alpineArch##*-}" in \
-          x86_64) ARCH='x64' CHECKSUM="03eabd9b71b3a2376693b521543251edd90dfb188883bcba4c07045d7ee46cd4" OPENSSL_ARCH=linux-x86_64;; \
+          x86_64) ARCH='x64' CHECKSUM="8a4633a9f8101de6870f7d4e5ceb3aa83d3c6cd7c11ad91cd902ea223b8c55fe" OPENSSL_ARCH=linux-x86_64;; \
           x86) OPENSSL_ARCH=linux-elf;; \
           aarch64) OPENSSL_ARCH=linux-aarch64;; \
           arm*) OPENSSL_ARCH=linux-armv4;; \
