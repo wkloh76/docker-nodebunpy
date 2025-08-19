@@ -7,10 +7,10 @@ FPYVENV="/app/pyvenv"
 RTXT="/app/requirements.txt"
 
 if [[ ! -z ${PYVENV} ]] && [[ ! -d ${FPYVENV} ]]; then
-    
-    python3 -m venv ${FPYVENV} && source ${FPYVENV}/bin/activate
-    if [[ -f ${RTXT} ]]; then
-      pip3 install -r ${RTXT}
+
+    uv venv ${FPYVENV} && source ${FPYVENV}/bin/activate
+    if [[ -f ${RTXT} ]]; then      
+      uv pip install -r ${RTXT}
     fi
     if [ ! -z ${USER_NAME+x} ]; then
       chown -R ${PUID}:${PGID} ${FPYVENV}

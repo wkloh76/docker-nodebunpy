@@ -101,8 +101,6 @@ RUN \
   apk add sudo \    
     git \  
     python3 \
-    py3-pip \
-    py3-virtualenv \    
     iproute2 \
     bash \
     xz \
@@ -228,6 +226,9 @@ RUN apk --no-cache add ca-certificates curl dirmngr gpg gpg-agent unzip openssl 
     && chmod +x /usr/local/bin/bun \
     && which bun \
     && bun --version
+
+# Install uv for python instead pip3 and pip
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # add local files
 COPY root/ /
