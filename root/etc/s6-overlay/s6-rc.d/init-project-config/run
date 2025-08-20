@@ -6,7 +6,14 @@ SYNO=${SYNO:-false}
 FPYVENV="/app/pyvenv"
 RTXT="/app/requirements.txt"
 
-if [[ ! -z ${PYVENV} ]] && [[ ! -d ${FPYVENV} ]]; then
+source ${HOME}/.local/bin/env
+
+GL="NO" 
+if [[ ! -z ${PYVENV} ]];then
+  GL=$PYVENV  
+fi
+
+if [[ "$GL" == "YES" ]]  && [[ ! -d ${FPYVENV} ]]; then
 
     uv venv ${FPYVENV} && source ${FPYVENV}/bin/activate
     if [[ -f ${RTXT} ]]; then      
