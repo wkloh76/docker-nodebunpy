@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade bun.js version to 1.2.20 and nodejs version 20.19.4. Completed on 2025-08-19
 - Implement `uv` intead python-pip3 to manage python packages include install,add and remove. Completed on 2025-08-19
+- Upgrade bun.js version to 1.2.21 and nodejs version 20.19.5. Completed on 2025-09-09
 
 ### Changed
 
