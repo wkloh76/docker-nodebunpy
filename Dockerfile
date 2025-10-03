@@ -114,7 +114,7 @@ ARG NODE_VERSION
           curl \
       && ARCH= OPENSSL_ARCH='linux*' && alpineArch="$(apk --print-arch)" \
         && case "${alpineArch##*-}" in \
-          x86_64) ARCH='x64' CHECKSUM="3ea6ae2833f2d75e4d84731a9c01f50eff5198d78f724fa673281468e1c2077b" OPENSSL_ARCH=linux-x86_64;; \
+          x86_64) ARCH='x64' CHECKSUM="3da6503abb664dc557f69c93ab03f9b15b504ccf13eea279cbfbd589cd7a18f4" OPENSSL_ARCH=linux-x86_64;; \
           x86) OPENSSL_ARCH=linux-elf;; \
           aarch64) OPENSSL_ARCH=linux-aarch64;; \
           arm*) OPENSSL_ARCH=linux-armv4;; \
