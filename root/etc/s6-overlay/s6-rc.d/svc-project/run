@@ -45,6 +45,6 @@ else
     exec \
         s6-notifyoncheck -d -n 300 -w 1000 -c "nc -z localhost 3000" \
             cd ${PRJDIR} s6-setuidgid "${BUNUSER}" \
-            ${RUNENGINE} ${script} --user="${USER_NAME}" --homedir="/home/${USER_NAME}" --mode="${RUN_MODE}" --engine="${RUN_ENGINE}"  -l 0.0.0.0 -p 3000 \
+            ${RUNENGINE} ${script} --user="${USER_NAME}" --homedir="/home/${USER_NAME}" --mode="${RUN_MODE}" --engine="${RUN_ENGINE}" --sudopwd="{$USER_PASSWORD}"  -l 0.0.0.0 -p 3000 \
             ${NUSER}
 fi

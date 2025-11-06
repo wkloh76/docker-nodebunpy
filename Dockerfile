@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM alpine:3.21 AS rootfs-stage
+FROM alpine:3.22 AS rootfs-stage
 
 ARG S6_OVERLAY_VERSION="3.2.1.0"
 ARG ROOTFS=/root-out
@@ -114,7 +114,7 @@ ARG NODE_VERSION
           curl \
       && ARCH= OPENSSL_ARCH='linux*' && alpineArch="$(apk --print-arch)" \
         && case "${alpineArch##*-}" in \
-          x86_64) ARCH='x64' CHECKSUM="3da6503abb664dc557f69c93ab03f9b15b504ccf13eea279cbfbd589cd7a18f4" OPENSSL_ARCH=linux-x86_64;; \
+          x86_64) ARCH='x64' CHECKSUM="7dd9412f284aaf215d0f9b14e841a3f4c31a85dee2dc58e0e81f9fcf2b92f4e7" OPENSSL_ARCH=linux-x86_64;; \
           x86) OPENSSL_ARCH=linux-elf;; \
           aarch64) OPENSSL_ARCH=linux-aarch64;; \
           arm*) OPENSSL_ARCH=linux-armv4;; \
@@ -145,7 +145,7 @@ ARG NODE_VERSION
       && export GNUPGHOME="$(mktemp -d)" \
       # gpg keys listed at https://github.com/nodejs/node#release-keys
       && for key in \
-        C0D6248439F1D5604AAFFB4021D900FFDB233756 \
+        5BE8A3F6C8A5C01D106C0AD820B1A390B168D356 \
         DD792F5973C6DE52C432CBDAC77ABFA00DDBF2B7 \
         CC68F5A3106FF448322E48ED27F5E38D5B0A215F \
         8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
@@ -154,8 +154,8 @@ ARG NODE_VERSION
         108F52B48DB57BB0CC439B2997B01419BD92F80A \
         A363A499291CBBC940DD62E41F10027AF002F8B0 \
       ; do \
-        gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "$key" || \
-        gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key" ; \
+        { gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "$key" && gpg --batch --fingerprint "$key"; } || \
+      { gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key" && gpg --batch --fingerprint "$key"; } ; \
       done \
       && curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION.tar.xz" \
       && curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
