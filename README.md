@@ -1,183 +1,229 @@
 # Docker Deploy NodeBunPy
 
 ![Static Badge](https://img.shields.io/badge/License-Mulan_PSL_v2-_)
-![Static Badge](https://img.shields.io/badge/NodeJS-V24_.9_.0-_)
-![Static Badge](https://img.shields.io/badge/BunJS-V1_.2_.23-_)
-![Static Badge](https://img.shields.io/badge/ElectronJS-V38_.2_.0-_)
+![Static Badge](https://img.shields.io/badge/NodeJS-V24_.18_.0-_)
+![Static Badge](https://img.shields.io/badge/BunJS-V1_.3_.14-_)
+![Static Badge](https://img.shields.io/badge/ElectronJS-V42_.4_.1-_)
 ![Static Badge](https://img.shields.io/badge/Python3-Latest-__?style=flat)
 ![Static Badge](https://img.shields.io/badge/OS-Alpine_3.20-_?style=flat)
 
-## Objectvie
+## Overview
 
-- Design docker images which will able deploy the project in `NodeJS` , `BunJS` or `Python3` design.
-- Project default framework is OricommJS which backend and frontend render html statement to browser. You can use other framework to support your project but the `docker-compose.yml` need to change a little bit.
+A Docker-based deployment toolkit that supports **Node.js**, **Bun**, and **Python 3** runtimes on Alpine Linux. It is designed to work seamlessly with [OricommJS](https://github.com/oricommjs) (the default framework), but can accommodate other frameworks with minor `docker-compose.yml` adjustments.
 
-- The docker-compose files combine both build and up containers feature in one files.
+### Key Features
 
-- Why choose Alpine OS because the images size will be small compare to other OS.
+- **Multi-runtime support** — Run projects with Node.js, Bun, or Python 3
+- **Alpine-based images** — Minimal image footprint
+- **Unified compose workflow** — Build and deploy from a single `docker-compose.yml`
+- **Configurable entry points** — Set `INTERPRETER` and `MAIN_APP` to switch runtimes and scripts
 
-## Environment setup
+## Quick Start
 
-### Docker deamon setup
+### Prerequisites
 
-- Create daemon file `/etc/docker/daemon.json` and content show as below
-  ```
-  {"insecure-registries":["xxx.xxx.xxx.xxx:port"]}
-  ```
-- Stop and start docker service from systemctl.
+- Docker & Docker Compose
+- Git
 
-  ```
-  sudo systemctl stop docker.socket && sudo systemctl stop docker.service
+### 1. Clone and configure
 
-  sudo systemctl start docker.socket && sudo systemctl start docker.service
-  ```
+```bash
+git clone <repo-url>
+cd docker-nodebunpy
+cp .env.example .env
+```
 
-### Git
+Edit `.env` to set your desired versions:
 
-- git config user.name "My Name"
+| Variable | Description     | Default                   |
+| -------- | --------------- | ------------------------- |
+| `IMG`    | Image name      | `alpine-nodebunpy-deploy` |
+| `TAG`    | Node.js version | `24.18.0`                 |
+| `ARG1`   | Bun version     | `1.3.14`                  |
 
-- git config user.email "myemail@example.com"
+### 2. Build the image
 
-### figlet
+```bash
+docker compose build
+```
 
-- FIGlet is a utility for creating large characters out of ordinary screen characters. It's often used in terminal sessions to create eye-catching text, banners, or headers.
+### 3. Deploy the container
 
-  ```
-  Figlet -w 60  'ALPINE BUNJS' >> ./BANNER
-  ```
+```bash
+docker compose up -d
+```
 
-## Take Noted
+The container runs `/app/app.js` (Node.js) or `/app/app.py` (Python 3) by default. Mount your project code to `/app`:
 
-- Docker image building relies on `.env` files. So copy and paste ".env.example" and rename it to ".env". After that run the command "docker compose build" in the terminal with the same project. You can change the .env setting value yourself.
-  ```
-  nodebun-build:
-    image: "${IMG}:${TAG}-${ARG1}"
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-      args:
-        NODE_VERSION: "${TAG}"
-        BUN_VERSION: "${ARG1}"
-  ```
-- Run command `docker compose up -d` will establish deploy container.The script target to run is `app.js` or `app.py` files and container check the file exist in `/app` folder. If no will run default script `app.js` or `app.py` from `/scripts` folder base on the `INTERPRETER` value.
+```yaml
+volumes:
+  - ./myapp:/app
+```
 
-  ```
-  nodebun-deploy:
-      image: "${IMG}:${TAG}-${ARG1}"
-      container_name: nodebun_deploy
-      environment:
-        - PUID=1000
-        - PGID=1000
-        - TZ=Asia/Kuala_Lumpur
-        - RUN_MODE=debug # debug or production
-        - RUN_ENGINE=webnodejs # webnodejs
-        - USER_PASSWORD=node1234 # Allow to change
-        - USER_NAME=node # Allow to change
-        # - PYVENV=YES # Active python virtual environment service
-        - INTERPRETER=node # Change runtime engine such as python,node and bun, default is bun
-        # - MAIN_APP=app.js
-      # volumes:
-      #   - ./testapp/app:/app  # The source code point to /app directory
-      working_dir: /app
-      ports:
-        - 9820-9821:3000-3001
-      shm_size: "2gb"
-      restart: unless-stopped
-  ```
+## Configuration
 
-- The project will run and target to `app.js` or `app.py` file.
-- Different senario the docker-compose setting will be change.
+### Environment Variables
 
-  1.  Default - Only support OricommJS framework run with node interpreter. The project code folder mount to /app. If want python virtual environment support , just change `PYVENV=YES` and make sure your project has `requirement.txt` file to install python packages during first time activate.
+| Variable        | Description                         | Default             |
+| --------------- | ----------------------------------- | ------------------- |
+| `PUID`          | User ID                             | `1000`              |
+| `PGID`          | Group ID                            | `1000`              |
+| `TZ`            | Timezone                            | `Asia/Kuala_Lumpur` |
+| `RUN_MODE`      | `debug` or `production`             | `debug`             |
+| `RUN_ENGINE`    | Runtime engine                      | `webnodejs`         |
+| `USER_NAME`     | Container username                  | `node`              |
+| `USER_PASSWORD` | Container password                  | `node1234`          |
+| `INTERPRETER`   | Runtime: `node`, `bun`, or `python` | `bun`               |
+| `MAIN_APP`      | Entry script (e.g. `app.py`)        | `app.js`            |
+| `PYVENV`        | Enable Python virtual environment   | `NO`                |
 
-      ```
-        nodebun-deploy:
-        image: "${IMG}:${TAG}-${ARG1}"
-        container_name: nodebun_deploy
-        environment:
-          - PUID=1000
-          - PGID=1000
-          - TZ=Asia/Kuala_Lumpur
-          - RUN_MODE=debug # debug or production
-          - RUN_ENGINE=webnodejs # webnodejs
-          - USER_PASSWORD=node1234 # Allow to change
-          - USER_NAME=node # Allow to change
-          - PYVENV=NO # Active python virtual environment
-        volumes:
-          - ./testapp/app:/app  # The source code point to /app directory
-        working_dir: /app
-        ports:
-          - 9820-9821:3000-3001
-        shm_size: "2gb"
-        restart: unless-stopped
-      ```
+### Ports
 
-  2.  OricommJS framework run with bun interpreter.
+| Container   | Host        |
+| ----------- | ----------- |
+| `3000-3001` | `9820-9821` |
 
-      ```
-        nodebun-deploy:
-        image: "${IMG}:${TAG}-${ARG1}"
-        container_name: nodebun_deploy
-        environment:
-          - PUID=1000
-          - PGID=1000
-          - TZ=Asia/Kuala_Lumpur
-          - RUN_MODE=debug # debug or production
-          - RUN_ENGINE=webnodejs # webnodejs
-          - USER_PASSWORD=node1234 # Allow to change
-          - USER_NAME=node # Allow to change
-          - PYVENV=NO # Active python virtual
-          environment
-          - INTERPRETER=bun # Change runtime engine such as python,node and bun, default is bun
-        volumes:
-          - ./testapp/app:/app  # The source code point to /app directory
-        working_dir: /app
-        ports:
-          - 9820-9821:3000-3001
-        shm_size: "2gb"
-        restart: unless-stopped
-      ```
+---
 
-  3.  For different framework project and different main script, assign the script file for `MAIN_APP` and other interpreter like ptyhon.
+## Usage Scenarios
 
-      ```
-        nodebun-deploy:
-        image: "${IMG}:${TAG}-${ARG1}"
-        container_name: nodebun_deploy
-        environment:
-          - PUID=1000
-          - PGID=1000
-          - TZ=Asia/Kuala_Lumpur
-          - RUN_MODE=debug # debug or production
-          - RUN_ENGINE=webnodejs # webnodejs
-          - USER_PASSWORD=node1234 # Allow to change
-          - USER_NAME=node # Allow to change
-          - PYVENV=NO # Active python virtual
-          environment
-          - INTERPRETER=python # Change runtime engine such as python,node and bun, default is bun
-          - MAIN_APP=app.py
-        volumes:
-          - ./testapp/app:/app  # The source code point to /app directory
-        working_dir: /app
-        ports:
-          - 9820-9821:3000-3001
-        shm_size: "2gb"
-        restart: unless-stopped
-      ```
+### Scenario 1 — OricommJS with Node.js (Default)
 
-# Reference
+```yaml
+nodebun-deploy:
+  image: "${IMG}:${TAG}-${ARG1}"
+  container_name: nodebun_deploy
+  environment:
+    - PUID=1000
+    - PGID=1000
+    - TZ=Asia/Kuala_Lumpur
+    - RUN_MODE=debug
+    - RUN_ENGINE=webnodejs
+    - USER_PASSWORD=test1234
+    - USER_NAME=test
+    - PYVENV=NO
+  volumes:
+    - ./testapp/app:/app
+  working_dir: /app
+  ports:
+    - 9820-9821:3000-3001
+  shm_size: "2gb"
+  restart: unless-stopped
+```
 
-- Change the password without prompt message box
+### Scenario 2 — OricommJS with Bun
 
-  ```
-  echo <user>:<password>> | sudo chpasswd
-  ```
+```yaml
+nodebun-deploy:
+  image: "${IMG}:${TAG}-${ARG1}"
+  container_name: nodebun_deploy
+  environment:
+    - PUID=1000
+    - PGID=1000
+    - TZ=Asia/Kuala_Lumpur
+    - RUN_MODE=debug
+    - RUN_ENGINE=webnodejs
+    - USER_PASSWORD=test1234
+    - USER_NAME=test
+    - PYVENV=NO
+    - INTERPRETER=bun
+  volumes:
+    - ./testapp/app:/app
+  working_dir: /app
+  ports:
+    - 9820-9821:3000-3001
+  shm_size: "2gb"
+  restart: unless-stopped
+```
 
-- [linueserver.io](https://github.com/linuxserver) is great community which provide allow of user docker images and also source code for build docker images. I am learn a lot form here.
+### Scenario 3 — Python with a custom entry script
 
-- [baseimage alpine 3.22-b9b6866a-ls3](https://github.com/linuxserver/docker-baseimage-alpine/releases/tag/3.22-b9b6866a-ls3)
+```yaml
+nodebun-deploy:
+  image: "${IMG}:${TAG}-${ARG1}"
+  container_name: nodebun_deploy
+  environment:
+    - PUID=1000
+    - PGID=1000
+    - TZ=Asia/Kuala_Lumpur
+    - RUN_MODE=debug
+    - RUN_ENGINE=webnodejs
+    - USER_PASSWORD=test1234
+    - USER_NAME=test
+    - PYVENV=NO
+    - INTERPRETER=python
+    - MAIN_APP=app.py
+  volumes:
+    - ./testapp/app:/app
+  working_dir: /app
+  ports:
+    - 9820-9821:3000-3001
+  shm_size: "2gb"
+  restart: unless-stopped
+```
 
-- [How to Set a Custom SSH Warning Banner and MOTD in Linux](https://www.tecmint.com/ssh-warning-banner-linux/)
-- [Crafting Striking Terminal Text with FIGlet](https://labex.io/tutorials/linux-crafting-striking-terminal-text-with-figlet-272383)
+### Python Virtual Environment
 
-- [how to check if a variable is set in bash](https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash)
+Set `PYVENV=YES` to activate a Python virtual environment. Ensure your project includes a `requirements.txt` file — packages will be installed on first run.
+
+## Docker Daemon Setup
+
+If you need to pull images from a private registry, configure the Docker daemon:
+
+1. Create `/etc/docker/daemon.json`:
+
+   ```json
+   { "insecure-registries": ["xxx.xxx.xxx.xxx:port"] }
+   ```
+
+2. Restart Docker:
+
+   ```bash
+   sudo systemctl stop docker.socket && sudo systemctl stop docker.service
+   sudo systemctl start docker.socket && sudo systemctl start docker.service
+   ```
+
+## Git Configuration
+
+```bash
+git config user.name "My Name"
+git config user.email "myemail@example.com"
+```
+
+## Utilities
+
+### FIGlet — Terminal Banners
+
+Create large ASCII text banners in the terminal:
+
+```bash
+figlet -w 60 'ALPINE BUNJS' > ./BANNER
+```
+
+### Change User Password (Non-interactive)
+
+```bash
+echo "<user>:<password>" | sudo chpasswd
+```
+
+## Project Structure
+
+```
+├── Dockerfile          # Multi-stage build (Alpine + Node.js + Bun + Python/uv)
+├── docker-compose.yml  # Build + deploy services
+├── .env.example        # Default environment variables
+├── scripts/
+│   ├── app.js          # Default Node.js entry point
+│   ├── app.py          # Default Python entry point
+│   └── install_module.js
+├── root/               # Base filesystem overlay
+└── README.md
+```
+
+## Reference
+
+- [LinuxServer.io](https://github.com/linuxserver) — Excellent community providing Docker images and build source code
+- [Alpine 3.22 base image](https://github.com/linuxserver/docker-baseimage-alpine/releases/tag/3.22-b9b6866a-ls3)
+- [SSH Warning Banner & MOTD](https://www.tecmint.com/ssh-warning-banner-linux/)
+- [Crafting Terminal Text with FIGlet](https://labex.io/tutorials/linux-crafting-striking-terminal-text-with-figlet-272383)
+- [Check if a variable is set in bash](https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash)
