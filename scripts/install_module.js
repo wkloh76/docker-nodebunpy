@@ -34,6 +34,30 @@ const searchFiles = async (dir, targetName) => {
 };
 
 (async () => {
+  // Show help
+  if (Bun.argv.includes("--help") || Bun.argv.includes("-h")) {
+    console.log(`
+Usage: helper <options>
+
+A utility script compiled from install_module.js for managing Node.js dependencies and ports inside the container.
+
+Options:
+  --help, -h          Show this help message
+  --proc=<mode>       Operation mode: "kill" or "install" (required)
+  --dir=<path>        Search directory for package.json files (default: "/opt/share")
+  --target=<path>     Symlink node_modules to this directory (used with "install")
+  --user=<user>       Username for path, or "disable" to skip user path (default: current user)
+  --port=<number>     Port number to check/kill (used with "kill")
+
+Examples:
+  helper --help
+  helper --proc=kill --port=3000
+  helper --proc=install --dir=/opt/share/myproject --target=/opt/share/myproject
+  helper --proc=install --dir=/opt/share/myproject --user=disable
+`);
+    process.exit(0);
+  }
+
   let argv = {};
   let proc = "";
   let dir = ".";
@@ -106,16 +130,23 @@ const searchFiles = async (dir, targetName) => {
         await writeFile(`${build}/package.json`, JSON.stringify(package));
         await $`${{ raw: "bun install --linker hoisted --no-save --no-lockfile" }}`.cwd(build);
         if (whoami != "")
-          await $`${{ raw: `mkdir -p /nodepath/${basename(dir)}` }}`;
-        if (await exists(`/nodepath/${basename(dir)}/node_modules`))
-          await $`${{ raw: `rm -r /nodepath/${basename(dir)}` }}`;
+          await $`${{ raw: `mkdir -p /nodepath${whoami}/${basename(dir)}` }}`;
+        if (await exists(`/nodepath${whoami}/${basename(dir)}/node_modules`))
+          await $`${{ raw: `rm -r /nodepath${whoami}/${basename(dir)}` }}`;
         await $`${{
-          raw: `cp -r node_modules /nodepath/${basename(
+          raw: `cp -r node_modules /nodepath${whoami}/${basename(
             dir
           )}/node_modules`,
         }}`.cwd(build);
       }
 
+      if (target) {
+        await $`${{
+          raw: `ln -sfn  /nodepath${whoami}/${basename(
+            dir
+          )}/node_modules ${target}/node_modules`,
+        }}`;
+      }
       await $`${{ raw: "rm -r node_modules package.json" }}`.cwd(build);
       console.log("Install done!");
       break;
