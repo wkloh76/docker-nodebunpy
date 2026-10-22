@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Summary
 
 - Design docker images which will able deploy the project in `NodeJS` , `BunJS` or `Python3` design.
+- Security release addressing CVE-2026-111497.
 
 ### Added
 
@@ -17,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ~~Upgrade bun.js version to 1.3.1 and nodejs version 24.11.0. Completed on 2025-11-05~~
 - Upgrade bun.js version to 1.3.14 and nodejs version 24.18.0. Completed on 2026-07-03
 - Add `lsiown` script instead downloand from linuxserver.io due to github not found issue. Completed on 2026-07-09
+- Upgrade nodejs version to 24.22.1 and bun.js version to 1.4.3. Completed on 2026-10-22
+- Upgrade base image from Alpine 3.22 to Alpine 3.24. Completed on 2026-10-22
 
 ### Changed
 
@@ -26,7 +29,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix Node.js install layer failing with `gpg: not found` — `gnupg` added to `.build-deps` and Node.js release keys imported before decrypting `SHASUMS256.txt.asc`. Completed on 2026-10-22
+
 ### Security
+
+- Address CVE-2026-111497 (HIGH): out-of-bounds write in the Node.js Brotli decoder permitting remote code execution, affecting Node.js 22.x, 24.x and 26.x. Fixed by upgrading to Node.js 24.22.1, the patched release line ([Node.js October 2026 security releases](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases)). Completed on 2026-10-22
 
 [1.0.2]: https://github.com/wkloh76/docker-nodebunpy/releases/tag/1.0.2
 

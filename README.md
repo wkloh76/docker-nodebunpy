@@ -1,11 +1,11 @@
 # Docker Deploy NodeBunPy
 
 ![Static Badge](https://img.shields.io/badge/License-Mulan_PSL_v2-_)
-![Static Badge](https://img.shields.io/badge/NodeJS-V24_.18_.0-_)
-![Static Badge](https://img.shields.io/badge/BunJS-V1_.3_.14-_)
+![Static Badge](https://img.shields.io/badge/NodeJS-V24_.22_.1-_)
+![Static Badge](https://img.shields.io/badge/BunJS-V1_.4_.3-_)
 ![Static Badge](https://img.shields.io/badge/ElectronJS-V42_.4_.1-_)
 ![Static Badge](https://img.shields.io/badge/Python3-Latest-__?style=flat)
-![Static Badge](https://img.shields.io/badge/OS-Alpine_3.20-_?style=flat)
+![Static Badge](https://img.shields.io/badge/OS-Alpine_3.24-_?style=flat)
 
 ## Overview
 
@@ -17,6 +17,11 @@ A Docker-based deployment toolkit that supports **Node.js**, **Bun**, and **Pyth
 - **Alpine-based images** — Minimal image footprint
 - **Unified compose workflow** — Build and deploy from a single `docker-compose.yml`
 - **Configurable entry points** — Set `INTERPRETER` and `MAIN_APP` to switch runtimes and scripts
+
+### Security
+
+- **CVE-2026-111497** (HIGH) — Out-of-bounds write in the Node.js Brotli decoder that can allow remote code execution, affecting Node.js 22.x, 24.x, and 26.x. Fixed in Node.js 22.23.4 / 24.22.1 / 26.12.1 ([Node.js October 2026 security releases](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases)).
+  This image builds on Node.js **24.22.1**, so it is not affected. Keep `TAG` at `24.22.1` or newer.
 
 ## Quick Start
 
@@ -38,8 +43,8 @@ Edit `.env` to set your desired versions:
 | Variable | Description     | Default                   |
 | -------- | --------------- | ------------------------- |
 | `IMG`    | Image name      | `alpine-nodebunpy-deploy` |
-| `TAG`    | Node.js version | `24.18.0`                 |
-| `ARG1`   | Bun version     | `1.3.14`                  |
+| `TAG`    | Node.js version | `24.22.1`                 |
+| `ARG1`   | Bun version     | `1.4.3`                   |
 
 ### 2. Build the image
 
@@ -223,7 +228,8 @@ echo "<user>:<password>" | sudo chpasswd
 ## Reference
 
 - [LinuxServer.io](https://github.com/linuxserver) — Excellent community providing Docker images and build source code
-- [Alpine 3.22 base image](https://github.com/linuxserver/docker-baseimage-alpine/releases/tag/3.22-b9b6866a-ls3)
+- [Alpine 3.24 base image](https://hub.docker.com/_/alpine)
+- [Node.js October 2026 security releases](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases) — CVE-2026-111497 advisory
 - [SSH Warning Banner & MOTD](https://www.tecmint.com/ssh-warning-banner-linux/)
 - [Crafting Terminal Text with FIGlet](https://labex.io/tutorials/linux-crafting-striking-terminal-text-with-figlet-272383)
 - [Check if a variable is set in bash](https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash)
